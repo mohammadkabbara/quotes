@@ -23,4 +23,10 @@ class AppTest {
         assertEquals( false , saveQuotes.contains("{author:  W. Purkey, text: nobody watching}") );
         assertEquals( true , saveQuotes.contains("{author: William W. Purkey, text:  “You've gotta dance like there's nobody watching}") );
     }
+    @Test void testApiReader() {
+        String apiUrl = "http://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en";
+        String testQuote =  App.apiQuotes(apiUrl);
+        assertTrue(testQuote != null);
+    }
+
 }

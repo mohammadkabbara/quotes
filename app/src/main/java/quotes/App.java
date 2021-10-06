@@ -7,9 +7,10 @@ package quotes;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
 
@@ -18,8 +19,12 @@ public class App {
 
     public static void main(String[] args){
         String path = "./app/src/main/resources/recentquotes.json";
-        getQuote(path);
+        String apiUrl = "http://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en";
+//        getQuote(path);
+        apiQuotes(apiUrl);
     }
+
+    ////////////////take quote from GSON/////////
     public static List getQuote(String path) {
         Gson gson = new Gson();
         FileReader fileReader = null;
@@ -36,4 +41,45 @@ public class App {
 
         return allQuotes;
     }
+
+
+    ////////////////take quote from API/////////
+    public static String apiQuotes(String apiUrl){
+        StringBuilder craeateApiQouet =new StringBuilder();
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection connect =(HttpURLConnection) url.openConnection();
+            connect.setRequestMethod("GET");
+            int status = connect.getResponseCode();
+            if (status == 200){
+                InputStream input =connect.getInputStream();
+                InputStreamReader reader = new InputStreamReader(input);
+                BufferedReader bufferedReader =new BufferedReader(reader);
+                String line = bufferedReader.readLine();
+                craeateApiQouet = new StringBuilder(line);
+                while (line !=null){
+                    System.out.println(line);
+                    line = bufferedReader.readLine();
+                    if(line != null){
+                        craeateApiQouet.append(line);
+                    }
+                }
+                bufferedReader.close();
+                FileWriter fileWriter = new FileWriter("addQuote.json");
+                fileWriter.write(craeateApiQouet.toString());
+                fileWriter.close();
+            }else {
+                System.out.println("error in status" + status);
+                getQuote("./app/src/main/resources/recentquotes.json");
+            }
+            connect.disconnect();
+
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return craeateApiQouet.toString();
+    }
+
+
 }
